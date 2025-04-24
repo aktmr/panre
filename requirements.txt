@@ -1,4 +1,3 @@
-misskey
+git+https://github.com/NaokiYamadaJP/misskey.py.git
 websockets
 flask
-misskey-py
