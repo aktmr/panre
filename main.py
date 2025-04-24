@@ -1,12 +1,17 @@
+import os
 import asyncio
 import json
 import random
 import websockets
 from misskey import Misskey
+from keep_alive import keep_alive
 
 # Misskeyのインスタンス情報
 INSTANCE = "pri.monster"
-TOKEN = "CLO1PhbNQ0G9TJ0F3L7ITMXqqqQNJrOv"
+TOKEN = os.getenv("TOKEN")  # 環境変数からトークンを取得
+
+if not TOKEN:
+    raise ValueError("TOKEN が設定されていません。Renderの環境変数を確認してください。")
 
 misskey = Misskey(INSTANCE, i=TOKEN)
 WS_URL = f"wss://{INSTANCE}/streaming?i={TOKEN}"
@@ -37,10 +42,10 @@ EXCLUDE_KEYWORDS = [
     "駄目"
 ]
 
-from keep_alive import keep_alive
-
+# Render の自動起動保持用サーバー
 keep_alive()
 
+# メイン処理
 async def listen():
     try:
         print("WebSocket 接続を開始しています...")
@@ -70,19 +75,16 @@ async def listen():
                     print(f"📄 内容: {text}")
                     print(f"🔒 可視性: {visibility}")
 
-                    # 「DMや非表示ノート」などには反応しない（公開/ホーム/フォロワー限定のみに）
                     if visibility not in ["public", "home", "followers"]:
                         print("🔒 可視性が対応外なのでスキップ")
                         continue
 
-                    # 除外ワードが含まれていたらスキップ
                     if any(exclude_word in text for exclude_word in EXCLUDE_KEYWORDS):
                         print("⚠️ 除外ワードが含まれているため、リアクションをスキップします")
                         continue
 
                     for word, reactions in KEYWORDS.items():
                         if word in text:
-                            # ランダムにリアクションを選ぶ
                             reaction = random.choice(reactions)
                             print(f"🎯 キーワード「{word}」に反応 → ランダムリアクション：{reaction}")
                             try:
