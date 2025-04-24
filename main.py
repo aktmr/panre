@@ -16,6 +16,18 @@ if not TOKEN:
 misskey = Misskey(INSTANCE, i=TOKEN)
 WS_URL = f"wss://{INSTANCE}/streaming?i={TOKEN}"
 
+# 好きな絵文字の記録用ファイル
+USER_REACTIONS_FILE = "user_reactions.json"
+if os.path.exists(USER_REACTIONS_FILE):
+    with open(USER_REACTIONS_FILE, "r", encoding="utf-8") as f:
+        user_reactions = json.load(f)
+else:
+    user_reactions = {}
+
+def save_user_reactions():
+    with open(USER_REACTIONS_FILE, "w", encoding="utf-8") as f:
+        json.dump(user_reactions, f, ensure_ascii=False, indent=2)
+
 # キーワードとランダムリアクション候補
 KEYWORDS = {
     "はんこ": [":hanko_sumi:", ":hanko_sena_miss::hanko_sena2:", ":hanko_sakuma_r2:", ":hanko_hasumi_miss:", ":hanko_hasumi:", ":hanko_sagami:", ":hanko_nagumo:", ":hanko_kunugi:", ":ksmc_kakuin:", ":kiryu_hanko:", ":hanko_sena:", ":hanko_mikejima:"],
@@ -79,10 +91,37 @@ async def listen():
                         print("🔒 可視性が対応外なのでスキップ")
                         continue
 
+                    # 絵文字記録コマンド処理
+                    if text.startswith("好きな絵文字は") and "だよ" in text:
+                        emoji = text.split("好きな絵文字は")[-1].split("だよ")[0].strip()
+                        if emoji:
+                            user_reactions[user_name] = emoji
+                            save_user_reactions()
+                            print(f"📝 {user_name} の好きな絵文字を {emoji} として保存しました")
+                            try:
+                                misskey.notes_reactions_create(note_id=note_id, reaction=":panre_happy:")
+                                print("🎉 リアクション（登録成功）: :panre_happy:")
+                            except Exception as e:
+                                print(f"❌ 登録リアクションエラー: {e}")
+                        continue
+
+                    # 除外ワードチェック
                     if any(exclude_word in text for exclude_word in EXCLUDE_KEYWORDS):
                         print("⚠️ 除外ワードが含まれているため、リアクションをスキップします")
                         continue
 
+                    # ユーザー登録済みの絵文字で自動リアクション
+                    if user_name in user_reactions:
+                        fav_emoji = user_reactions[user_name]
+                        if fav_emoji in text:
+                            try:
+                                misskey.notes_reactions_create(note_id=note_id, reaction=fav_emoji)
+                                print(f"💖 ユーザーの好きな絵文字が含まれていたのでリアクション：{fav_emoji}")
+                            except Exception as e:
+                                print(f"❌ 好きな絵文字リアクションエラー: {e}")
+                            continue
+
+                    # 通常のキーワード反応
                     for word, reactions in KEYWORDS.items():
                         if word in text:
                             reaction = random.choice(reactions)
@@ -99,4 +138,3 @@ async def listen():
 
 # 実行
 asyncio.run(listen())
-
