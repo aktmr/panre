@@ -31,10 +31,10 @@ def save_user_reactions():
 
 # キーワードとランダムリアクション候補
 KEYWORDS = {
-    "はんこ": [":hanko_sumi:", ":hanko_sena_miss::hanko_sena2:", ":hanko_sakuma_r2:", ":hanko_hasumi_miss:", ":hanko_hasumi:", ":hanko_sagami:", ":hanko_nagumo:", ":hanko_kunugi:", ":ksmc_kakuin:", ":kiryu_hanko:", ":hanko_sena:", ":hanko_mikejima:"],
-    "ハンコ": [":hanko_sumi:", ":hanko_sena_miss::hanko_sena2:", ":hanko_sakuma_r2:", ":hanko_hasumi_miss:", ":hanko_hasumi:", ":hanko_sagami:", ":hanko_nagumo:", ":hanko_kunugi:", ":ksmc_kakuin:", ":kiryu_hanko:", ":hanko_sena:", ":hanko_mikejima:"],
-    "判子": [":hanko_sumi:", ":hanko_sena_miss::hanko_sena2:", ":hanko_sakuma_r2:", ":hanko_hasumi_miss:", ":hanko_hasumi:", ":hanko_sagami:", ":hanko_nagumo:", ":hanko_kunugi:", ":ksmc_kakuin:", ":kiryu_hanko:", ":hanko_sena:", ":hanko_mikejima:"],
-    "印鑑": [":hanko_sumi:", ":hanko_sena_miss::hanko_sena2:", ":hanko_sakuma_r2:", ":hanko_hasumi_miss:", ":hanko_hasumi:", ":hanko_sagami:", ":hanko_nagumo:", ":hanko_kunugi:", ":ksmc_kakuin:", ":kiryu_hanko:", ":hanko_sena:", ":hanko_mikejima:"],
+    "はんこ": [":hanko_sumi:", ":hanko_sena_miss:", ":hanko_sena2:", ":hanko_sakuma_r2:", ":hanko_hasumi_miss:", ":hanko_hasumi:", ":hanko_sagami:", ":hanko_nagumo:", ":hanko_kunugi:", ":ksmc_kakuin:", ":kiryu_hanko:", ":hanko_sena:", ":hanko_mikejima:"],
+    "ハンコ": [":hanko_sumi:", ":hanko_sena_miss:", ":hanko_sena2:", ":hanko_sakuma_r2:", ":hanko_hasumi_miss:", ":hanko_hasumi:", ":hanko_sagami:", ":hanko_nagumo:", ":hanko_kunugi:", ":ksmc_kakuin:", ":kiryu_hanko:", ":hanko_sena:", ":hanko_mikejima:"],
+    "判子": [":hanko_sumi:", ":hanko_sena_miss:", ":hanko_sena2:", ":hanko_sakuma_r2:", ":hanko_hasumi_miss:", ":hanko_hasumi:", ":hanko_sagami:", ":hanko_nagumo:", ":hanko_kunugi:", ":ksmc_kakuin:", ":kiryu_hanko:", ":hanko_sena:", ":hanko_mikejima:"],
+    "印鑑": [":hanko_sumi:", ":hanko_sena_miss:", ":hanko_sena2:", ":hanko_sakuma_r2:", ":hanko_hasumi_miss:", ":hanko_hasumi:", ":hanko_sagami:", ":hanko_nagumo:", ":hanko_kunugi:", ":ksmc_kakuin:", ":kiryu_hanko:", ":hanko_sena:", ":hanko_mikejima:"],
     "ぱんれ": [":panre_close:", ":gohan_time_cat:", ":panre_dabadaba:", ":panre_half:", ":panre_iq:", ":panre_mirror:", ":panre_ndi:", ":panre_ore:"],
     "パン": [":ibuki_nomming:", ":ibuki_nomming2:", ":panre_fes_0point:", ":panre_fes_1point:", ":panre_fes_2point:", ":panre_fes_3point:", ":pandead_1point:", ":pandead_3point_foul:"],
     "ほめて": [":petthex:", ":panre_shortarms:"],
