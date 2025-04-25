@@ -66,13 +66,13 @@ EXCLUDE_KEYWORDS = [
 def get_reaction_delay():
     now_hour = datetime.now().hour
     if 6 <= now_hour < 12:
-        return random.randint(60, 120)  # 朝
+        return random.randint(4, 8)  # 朝
     elif 12 <= now_hour < 18:
-        return random.randint(40, 70)   # 昼
+        return random.randint(6, 8)   # 昼
     elif 18 <= now_hour < 24:
-        return random.randint(10, 40)   # 夜
+        return random.randint(2, 4)   # 夜
     else:
-        return random.randint(15, 45)   # 深夜
+        return random.randint(2, 7)   # 深夜
 
 # Render の自動起動保持用サーバー
 keep_alive()
