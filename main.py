@@ -5,6 +5,7 @@ import random
 import websockets
 from misskey import Misskey
 from keep_alive import keep_alive
+from datetime import datetime
 
 # Misskeyのインスタンス情報
 INSTANCE = "pri.monster"
@@ -61,6 +62,18 @@ EXCLUDE_KEYWORDS = [
     "ジャパン"
 ]
 
+# 時間帯に応じた遅延（秒）
+def get_reaction_delay():
+    now_hour = datetime.now().hour
+    if 6 <= now_hour < 12:
+        return random.randint(60, 120)  # 朝
+    elif 12 <= now_hour < 18:
+        return random.randint(40, 70)   # 昼
+    elif 18 <= now_hour < 24:
+        return random.randint(10, 40)   # 夜
+    else:
+        return random.randint(15, 45)   # 深夜
+
 # Render の自動起動保持用サーバー
 keep_alive()
 
@@ -97,6 +110,11 @@ async def listen():
                     if visibility not in ["public", "home", "followers"]:
                         print("🔒 可視性が対応外なのでスキップ")
                         continue
+
+                    # 遅延時間を取得して待機
+                    delay = get_reaction_delay()
+                    print(f"⏳ {delay}秒待機してから反応します")
+                    await asyncio.sleep(delay)
 
                     # 絵文字記録コマンド処理
                     if text.startswith("好きな絵文字は") and "だよ" in text:
