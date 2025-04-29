@@ -1,3 +1,21 @@
+from flask import Flask
+import threading
+
+# Flaskアプリ作成
+app = Flask(__name__)
+
+@app.route('/')
+def home():
+    return "Bot is alive!"
+
+def run_flask():
+    app.run(host='0.0.0.0', port=10000)
+
+# Flaskサーバーを別スレッドで起動
+flask_thread = threading.Thread(target=run_flask)
+flask_thread.daemon = True
+flask_thread.start()
+
 import os
 import asyncio
 import json
