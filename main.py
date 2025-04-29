@@ -95,6 +95,10 @@ def get_reaction_delay():
 # Render の自動起動保持用サーバー
 keep_alive()
 
+# テスト導入
+flask_thread = threading.Thread(target=run_flask)
+flask_thread.start()
+
 # メイン処理
 async def listen():
     try:
