@@ -1,7 +1,14 @@
 from flask import Flask
 import threading
+import os
+import asyncio
+import json
+import random
+import websockets
+from misskey import Misskey
+from datetime import datetime
 
-# Flaskアプリ作成
+# ========== Flask（Render + UptimeRobot用） ==========
 app = Flask(__name__)
 
 @app.route('/')
@@ -11,23 +18,13 @@ def home():
 def run_flask():
     app.run(host='0.0.0.0', port=10000)
 
-# Flaskサーバーを別スレッドで起動
 flask_thread = threading.Thread(target=run_flask)
 flask_thread.daemon = True
 flask_thread.start()
 
-import os
-import asyncio
-import json
-import random
-import websockets
-from misskey import Misskey
-from keep_alive import keep_alive
-from datetime import datetime
-
-# Misskeyのインスタンス情報
+# ========== Misskey設定 ==========
 INSTANCE = "pri.monster"
-TOKEN = os.getenv("TOKEN")  # 環境変数からトークンを取得
+TOKEN = os.getenv("TOKEN")
 
 if not TOKEN:
     raise ValueError("TOKEN が設定されていません。Renderの環境変数を確認してください。")
@@ -35,7 +32,7 @@ if not TOKEN:
 misskey = Misskey(INSTANCE, i=TOKEN)
 WS_URL = f"wss://{INSTANCE}/streaming?i={TOKEN}"
 
-# 好きな絵文字の記録用ファイル
+# ========== ユーザーリアクションデータ ==========
 USER_REACTIONS_FILE = "user_reactions.json"
 if os.path.exists(USER_REACTIONS_FILE):
     with open(USER_REACTIONS_FILE, "r", encoding="utf-8") as f:
@@ -47,12 +44,9 @@ def save_user_reactions():
     with open(USER_REACTIONS_FILE, "w", encoding="utf-8") as f:
         json.dump(user_reactions, f, ensure_ascii=False, indent=2)
 
-# キーワードとランダムリアクション候補
+# ========== キーワード ==========
 KEYWORDS = {
     "はんこ": [":hanko_sumi:", ":hanko_sena_miss:", ":hanko_sena2:", ":hanko_sakuma_r2:", ":hanko_hasumi_miss:", ":hanko_hasumi:", ":hanko_sagami:", ":hanko_nagumo:", ":hanko_kunugi:", ":ksmc_kakuin:", ":kiryu_hanko:", ":hanko_sena:", ":hanko_mikejima:"],
-    "ハンコ": [":hanko_sumi:", ":hanko_sena_miss:", ":hanko_sena2:", ":hanko_sakuma_r2:", ":hanko_hasumi_miss:", ":hanko_hasumi:", ":hanko_sagami:", ":hanko_nagumo:", ":hanko_kunugi:", ":ksmc_kakuin:", ":kiryu_hanko:", ":hanko_sena:", ":hanko_mikejima:"],
-    "判子": [":hanko_sumi:", ":hanko_sena_miss:", ":hanko_sena2:", ":hanko_sakuma_r2:", ":hanko_hasumi_miss:", ":hanko_hasumi:", ":hanko_sagami:", ":hanko_nagumo:", ":hanko_kunugi:", ":ksmc_kakuin:", ":kiryu_hanko:", ":hanko_sena:", ":hanko_mikejima:"],
-    "印鑑": [":hanko_sumi:", ":hanko_sena_miss:", ":hanko_sena2:", ":hanko_sakuma_r2:", ":hanko_hasumi_miss:", ":hanko_hasumi:", ":hanko_sagami:", ":hanko_nagumo:", ":hanko_kunugi:", ":ksmc_kakuin:", ":kiryu_hanko:", ":hanko_sena:", ":hanko_mikejima:"],
     "ぱんれ": [":panre_close:", ":gohan_time_cat:", ":panre_dabadaba:", ":panre_half:", ":panre_iq:", ":panre_mirror:", ":panre_ndi:", ":panre_ore:"],
     "パン": [":ibuki_nomming:", ":ibuki_nomming2:", ":panre_fes_0point:", ":panre_fes_1point:", ":panre_fes_2point:", ":panre_fes_3point:", ":pandead_1point:", ":pandead_3point_foul:"],
     "ほめて": [":petthex:", ":panre_shortarms:"],
@@ -66,118 +60,104 @@ KEYWORDS = {
     "ぷりしろ": [":panre_honmono_silence:", ":panre_puri:", ":panre_honmono_close:", ":panre_pote:", ":panre_iq:", ":panre_honmono:", ":panre_cry:"]
 }
 
-# 反応しないキーワード（除外ワード）
 EXCLUDE_KEYWORDS = [
-    "食べたい", 
-    "パンツ",
-    "フライパン", 
-    "パンフレット",
-    "パンダ", 
-    "パントマイム",
-    "チノパン", 
-    "ジーパン",
-    "パンチ",
-    "ジャパン"
+    "食べたい", "パンツ", "フライパン", "パンフレット", "パンダ",
+    "パントマイム", "チノパン", "ジーパン", "パンチ", "ジャパン"
 ]
 
-# 時間帯に応じた遅延（秒）
+# ========== 時間帯遅延 ==========
 def get_reaction_delay():
     now_hour = datetime.now().hour
     if 6 <= now_hour < 12:
-        return random.randint(4, 8)  # 朝
+        return random.randint(4, 8)
     elif 12 <= now_hour < 18:
-        return random.randint(6, 8)   # 昼
+        return random.randint(6, 8)
     elif 18 <= now_hour < 24:
-        return random.randint(2, 4)   # 夜
+        return random.randint(2, 4)
     else:
-        return random.randint(2, 7)   # 深夜
+        return random.randint(2, 7)
 
-# Render の自動起動保持用サーバー
-keep_alive()
-
-# メイン処理
+# ========== WebSocket処理 ==========
 async def listen():
-    try:
-        print("WebSocket 接続を開始しています...")
-        async with websockets.connect(WS_URL) as websocket:
-            await websocket.send(json.dumps({
-                "type": "connect",
-                "body": {
-                    "channel": "localTimeline",
-                    "id": "local"
-                }
-            }))
-            print("✅ タイムラインのストリーミング接続が確立しました")
+    print("WebSocket 接続を開始しています...")
+    async with websockets.connect(WS_URL) as websocket:
+        await websocket.send(json.dumps({
+            "type": "connect",
+            "body": {
+                "channel": "localTimeline",
+                "id": "local"
+            }
+        }))
+        print("✅ タイムラインのストリーミング接続が確立しました")
 
-            while True:
-                msg = await websocket.recv()
-                data = json.loads(msg)
+        while True:
+            msg = await websocket.recv()
+            data = json.loads(msg)
 
-                if data["type"] == "channel" and data["body"]["type"] == "note":
-                    note = data["body"]["body"]
-                    text = note.get("text", "")
-                    note_id = note["id"]
-                    user_name = note["user"]["username"]
-                    visibility = note.get("visibility", "unknown")
+            if data["type"] == "channel" and data["body"]["type"] == "note":
+                note = data["body"]["body"]
+                text = note.get("text", "")
+                note_id = note["id"]
+                user_name = note["user"]["username"]
+                visibility = note.get("visibility", "unknown")
 
-                    print(f"\n--- ノート受信 ---")
-                    print(f"👤 投稿者: {user_name}")
-                    print(f"📄 内容: {text}")
-                    print(f"🔒 可視性: {visibility}")
+                print(f"\n--- ノート受信 ---")
+                print(f"👤 投稿者: {user_name}")
+                print(f"📄 内容: {text}")
+                print(f"🔒 可視性: {visibility}")
 
-                    if visibility not in ["public", "home", "followers"]:
-                        print("🔒 可視性が対応外なのでスキップ")
+                if visibility not in ["public", "home", "followers"]:
+                    continue
+
+                delay = get_reaction_delay()
+                print(f"⏳ {delay}秒待機してから反応します")
+                await asyncio.sleep(delay)
+
+                # 好きな絵文字登録
+                if text.startswith("好きな絵文字は") and "だよ" in text:
+                    emoji = text.split("好きな絵文字は")[-1].split("だよ")[0].strip()
+                    if emoji:
+                        user_reactions[user_name] = emoji
+                        save_user_reactions()
+                        print(f"📝 {user_name} の好きな絵文字を {emoji} として保存しました")
+                        try:
+                            misskey.notes_reactions_create(note_id=note_id, reaction=":panre_happy:")
+                        except Exception as e:
+                            print(f"❌ 登録リアクションエラー: {e}")
+                    continue
+
+                if any(word in text for word in EXCLUDE_KEYWORDS):
+                    print("⚠️ 除外ワードが含まれているためスキップ")
+                    continue
+
+                if user_name in user_reactions:
+                    fav_emoji = user_reactions[user_name]
+                    if fav_emoji in text:
+                        try:
+                            misskey.notes_reactions_create(note_id=note_id, reaction=fav_emoji)
+                            print(f"💖 好きな絵文字でリアクション：{fav_emoji}")
+                        except Exception as e:
+                            print(f"❌ リアクションエラー: {e}")
                         continue
 
-                    # 遅延時間を取得して待機
-                    delay = get_reaction_delay()
-                    print(f"⏳ {delay}秒待機してから反応します")
-                    await asyncio.sleep(delay)
+                for word, reactions in KEYWORDS.items():
+                    if word in text:
+                        reaction = random.choice(reactions)
+                        try:
+                            misskey.notes_reactions_create(note_id=note_id, reaction=reaction)
+                            print(f"✅ キーワード反応: {reaction}")
+                        except Exception as e:
+                            print(f"❌ リアクションエラー: {e}")
+                        break
 
-                    # 絵文字記録コマンド処理
-                    if text.startswith("好きな絵文字は") and "だよ" in text:
-                        emoji = text.split("好きな絵文字は")[-1].split("だよ")[0].strip()
-                        if emoji:
-                            user_reactions[user_name] = emoji
-                            save_user_reactions()
-                            print(f"📝 {user_name} の好きな絵文字を {emoji} として保存しました")
-                            try:
-                                misskey.notes_reactions_create(note_id=note_id, reaction=":panre_happy:")
-                                print("🎉 リアクション（登録成功）: :panre_happy:")
-                            except Exception as e:
-                                print(f"❌ 登録リアクションエラー: {e}")
-                        continue
+# ========== 自動再接続付き起動 ==========
+async def main_loop():
+    while True:
+        try:
+            await listen()
+        except Exception as e:
+            print(f"❌ 接続エラー（再接続します）: {e}")
+            await asyncio.sleep(10)
 
-                    # 除外ワードチェック
-                    if any(exclude_word in text for exclude_word in EXCLUDE_KEYWORDS):
-                        print("⚠️ 除外ワードが含まれているため、リアクションをスキップします")
-                        continue
+asyncio.run(main_loop())
 
-                    # ユーザー登録済みの絵文字で自動リアクション
-                    if user_name in user_reactions:
-                        fav_emoji = user_reactions[user_name]
-                        if fav_emoji in text:
-                            try:
-                                misskey.notes_reactions_create(note_id=note_id, reaction=fav_emoji)
-                                print(f"💖 ユーザーの好きな絵文字が含まれていたのでリアクション：{fav_emoji}")
-                            except Exception as e:
-                                print(f"❌ 好きな絵文字リアクションエラー: {e}")
-                            continue
-
-                    # 通常のキーワード反応
-                    for word, reactions in KEYWORDS.items():
-                        if word in text:
-                            reaction = random.choice(reactions)
-                            print(f"🎯 キーワード「{word}」に反応 → ランダムリアクション：{reaction}")
-                            try:
-                                misskey.notes_reactions_create(note_id=note_id, reaction=reaction)
-                                print(f"✅ リアクション完了: {reaction}")
-                            except Exception as e:
-                                print(f"❌ リアクションエラー: {e}")
-                            break
-
-    except Exception as e:
-        print(f"❌ 接続エラー: {e}")
-
-# 実行
-asyncio.run(listen())
