@@ -150,6 +150,18 @@ async def listen():
                             print(f"❌ リアクションエラー: {e}")
                         break
 
+# ========== デプロイ時にノートを投稿 ==========
+def post_initial_note():
+    try:
+        message = "<small>（ワタを詰め替えられている...）</small>"
+        misskey.notes_create(text=message, visibility="local")
+        print(f"✅ 初期ノートを投稿しました: {message}")
+    except Exception as e:
+        print(f"❌ ノート投稿エラー: {e}")
+
+# 初期ノートの投稿
+post_initial_note()
+
 # ========== 自動再接続付き起動 ==========
 async def main_loop():
     while True:
@@ -158,6 +170,9 @@ async def main_loop():
         except Exception as e:
             print(f"❌ 接続エラー（再接続します）: {e}")
             await asyncio.sleep(10)
+
+asyncio.run(main_loop())
+
 
 asyncio.run(main_loop())
 
