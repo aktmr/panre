@@ -32,11 +32,11 @@ if not TOKEN:
 misskey = Misskey(INSTANCE, i=TOKEN)
 WS_URL = f"wss://{INSTANCE}/streaming?i={TOKEN}"
 
-# ✅ 起動時にローカル限定ノートを投稿
+# ========== 起動時ノート投稿 ==========
 try:
     misskey.notes_create(
-        text="<small>（ぱんれはワタを詰め替えられてる！）</small>",
-        visibility="public",
+        text="<small>（ワタを詰め替えられている...）</small>",
+        visibility="home",
         localOnly=True
     )
     print("📝 起動時にローカル限定ノートを投稿しました")
@@ -80,9 +80,9 @@ EXCLUDE_KEYWORDS = [
 def get_reaction_delay():
     now_hour = datetime.now().hour
     if 6 <= now_hour < 12:
-        return random.randint(9, 12)
+        return random.randint(4, 8)
     elif 12 <= now_hour < 18:
-        return random.randint(13, 16)
+        return random.randint(6, 8)
     elif 18 <= now_hour < 24:
         return random.randint(2, 4)
     else:
@@ -171,4 +171,3 @@ async def main_loop():
             await asyncio.sleep(10)
 
 asyncio.run(main_loop())
-
