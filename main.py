@@ -32,17 +32,6 @@ if not TOKEN:
 misskey = Misskey(INSTANCE, i=TOKEN)
 WS_URL = f"wss://{INSTANCE}/streaming?i={TOKEN}"
 
-# ========== 起動時ノート投稿 ==========
-try:
-    misskey.notes_create(
-        text="<small>（ワタを詰め替えられている...）</small>",
-        visibility="home",
-        localOnly=True
-    )
-    print("📝 起動時にローカル限定ノートを投稿しました")
-except Exception as e:
-    print(f"❌ 起動ノート投稿失敗: {e}")
-
 # ========== ユーザーリアクションデータ ==========
 USER_REACTIONS_FILE = "user_reactions.json"
 if os.path.exists(USER_REACTIONS_FILE):
@@ -58,6 +47,9 @@ def save_user_reactions():
 # ========== キーワード ==========
 KEYWORDS = {
     "はんこ": [":hanko_sumi:", ":hanko_sena_miss:", ":hanko_sena2:", ":hanko_sakuma_r2:", ":hanko_hasumi_miss:", ":hanko_hasumi:", ":hanko_sagami:", ":hanko_nagumo:", ":hanko_kunugi:", ":ksmc_kakuin:", ":kiryu_hanko:", ":hanko_sena:", ":hanko_mikejima:"],
+    "ハンコ": [":hanko_sumi:", ":hanko_sena_miss:", ":hanko_sena2:", ":hanko_sakuma_r2:", ":hanko_hasumi_miss:", ":hanko_hasumi:", ":hanko_sagami:", ":hanko_nagumo:", ":hanko_kunugi:", ":ksmc_kakuin:", ":kiryu_hanko:", ":hanko_sena:", ":hanko_mikejima:"],
+    "印鑑": [":hanko_sumi:", ":hanko_sena_miss:", ":hanko_sena2:", ":hanko_sakuma_r2:", ":hanko_hasumi_miss:", ":hanko_hasumi:", ":hanko_sagami:", ":hanko_nagumo:", ":hanko_kunugi:", ":ksmc_kakuin:", ":kiryu_hanko:", ":hanko_sena:", ":hanko_mikejima:"],
+    "判子": [":hanko_sumi:", ":hanko_sena_miss:", ":hanko_sena2:", ":hanko_sakuma_r2:", ":hanko_hasumi_miss:", ":hanko_hasumi:", ":hanko_sagami:", ":hanko_nagumo:", ":hanko_kunugi:", ":ksmc_kakuin:", ":kiryu_hanko:", ":hanko_sena:", ":hanko_mikejima:"],
     "ぱんれ": [":panre_close:", ":gohan_time_cat:", ":panre_dabadaba:", ":panre_half:", ":panre_iq:", ":panre_mirror:", ":panre_ndi:", ":panre_ore:"],
     "パン": [":ibuki_nomming:", ":ibuki_nomming2:", ":panre_fes_0point:", ":panre_fes_1point:", ":panre_fes_2point:", ":panre_fes_3point:", ":pandead_1point:", ":pandead_3point_foul:"],
     "ほめて": [":petthex:", ":panre_shortarms:"],
@@ -72,7 +64,7 @@ KEYWORDS = {
 }
 
 EXCLUDE_KEYWORDS = [
-    "食べたい", "パンツ", "フライパン", "パンフレット", "パンダ",
+    "食べたい", "パンツ", "フライパン", "パンフ", "パンダ",
     "パントマイム", "チノパン", "ジーパン", "パンチ", "ジャパン"
 ]
 
@@ -80,9 +72,9 @@ EXCLUDE_KEYWORDS = [
 def get_reaction_delay():
     now_hour = datetime.now().hour
     if 6 <= now_hour < 12:
-        return random.randint(8, 13)
+        return random.randint(8, 10)
     elif 12 <= now_hour < 18:
-        return random.randint(6, 10)
+        return random.randint(6, 8)
     elif 18 <= now_hour < 24:
         return random.randint(2, 4)
     else:
@@ -171,3 +163,4 @@ async def main_loop():
             await asyncio.sleep(10)
 
 asyncio.run(main_loop())
+
