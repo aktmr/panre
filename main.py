@@ -80,9 +80,9 @@ EXCLUDE_KEYWORDS = [
 def get_reaction_delay():
     now_hour = datetime.now().hour
     if 6 <= now_hour < 12:
-        return random.randint(4, 8)
+        return random.randint(8, 13)
     elif 12 <= now_hour < 18:
-        return random.randint(6, 8)
+        return random.randint(6, 10)
     elif 18 <= now_hour < 24:
         return random.randint(2, 4)
     else:
