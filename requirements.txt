@@ -1,3 +1,4 @@
 flask
 websockets
 misskey.py
+nest_asyncio
