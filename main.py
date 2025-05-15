@@ -162,6 +162,13 @@ async def main_loop():
             print(f"❌ 接続エラー（再接続します）: {e}")
             await asyncio.sleep(10)
 
-asyncio.run(main_loop())
+import nest_asyncio
+nest_asyncio.apply()
 
+if __name__ == "__main__":
+    loop = asyncio.get_event_loop()
+    flask_thread = threading.Thread(target=run_flask)
+    flask_thread.daemon = True
+    flask_thread.start()
+    loop.run_until_complete(main_loop())
 
