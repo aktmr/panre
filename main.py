@@ -162,14 +162,6 @@ async def main_loop():
             print(f"❌ 接続エラー（再接続します）: {e}")
             await asyncio.sleep(10)
 
-def start_bot():
-    asyncio.run(main_loop())
+asyncio.run(main_loop())
 
-# ========== 並列実行 ==========
-if __name__ == "__main__":
-    bot_thread = threading.Thread(target=start_bot)
-    bot_thread.daemon = True
-    bot_thread.start()
-
-    app.run(host='0.0.0.0', port=10000)
 
