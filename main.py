@@ -15,6 +15,13 @@ app = Flask(__name__)
 def home():
     return "Bot is alive!"
 
+def run_flask():
+    app.run(host='0.0.0.0', port=10000)
+
+flask_thread = threading.Thread(target=run_flask)
+flask_thread.daemon = True
+flask_thread.start()
+
 # ========== Misskey設定 ==========
 INSTANCE = "pri.monster"
 TOKEN = os.getenv("TOKEN")
@@ -155,17 +162,4 @@ async def main_loop():
             print(f"❌ 接続エラー（再接続します）: {e}")
             await asyncio.sleep(10)
 
-import nest_asyncio
-nest_asyncio.apply()
-
-def run_flask():
-    port = int(os.environ.get("PORT", 10000))  # Render対応: PORT環境変数を使用
-    app.run(host='0.0.0.0', port=port)
-
-if __name__ == "__main__":
-    flask_thread = threading.Thread(target=run_flask)
-    flask_thread.daemon = True
-    flask_thread.start()
-
-    loop = asyncio.get_event_loop()
-    loop.run_until_complete(main_loop())
+asyncio.run(main_loop())
