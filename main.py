@@ -165,10 +165,14 @@ async def main_loop():
 import nest_asyncio
 nest_asyncio.apply()
 
+def run_flask():
+    port = int(os.environ.get("PORT", 10000))  # Render対応: PORT環境変数を使用
+    app.run(host='0.0.0.0', port=port)
+
 if __name__ == "__main__":
-    loop = asyncio.get_event_loop()
     flask_thread = threading.Thread(target=run_flask)
     flask_thread.daemon = True
     flask_thread.start()
-    loop.run_until_complete(main_loop())
 
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(main_loop())
