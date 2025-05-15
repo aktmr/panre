@@ -15,10 +15,6 @@ app = Flask(__name__)
 def home():
     return "Bot is alive!"
 
-flask_thread = threading.Thread(target=run_flask)
-flask_thread.daemon = True
-flask_thread.start()
-
 # ========== Misskey設定 ==========
 INSTANCE = "pri.monster"
 TOKEN = os.getenv("TOKEN")
