@@ -57,7 +57,7 @@ KEYWORDS = {
     "おはよう": [":panle_morning:", ":panle_sleep:"],
     "おやすみ": [":panre_honmono:", ":oyasumi2:", ":panre_cry:"],
     "ぱんれおやすみ": [":panre_honmono:", ":oyasumi2:", ":panre_cry:"],
-    "ねるか": [":panre_honmono:", ":oyasumi2:", ":panre_cry:"],
+    "寝る": [":panre_honmono:", ":oyasumi2:", ":panre_cry:"],
     "寝るか": [":panre_honmono:", ":oyasumi2:", ":panre_cry:"],
     ":oyapumi:": [":panre_honmono:", ":oyasumi2:", ":panre_cry:"],
     "ぷりしろ": [":panre_honmono_silence:", ":panre_puri:", ":panre_honmono_close:", ":panre_pote:", ":panre_iq:", ":panre_honmono:", ":panre_cry:"]
